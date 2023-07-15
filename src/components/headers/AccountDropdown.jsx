@@ -5,6 +5,7 @@ import {useRecoilState} from "recoil";
 import userState from "../../atoms/userAtom.js";
 import {fetchUser, logout} from "../../utils/api.js";
 import linkListState from "../../atoms/linkListAtom.js";
+import {Link} from "react-router-dom";
 
 const AccountDropdown = () => {
     const [open, setOpen] = useState(false);
@@ -47,18 +48,18 @@ const AccountDropdown = () => {
 
                 {open &&
                     <div className="top-16 absolute flex flex-col outline outline-1 outline-neutral-300 rounded bg-white shadow">
-                        <a href={"/account/profile"} className="p-2 flex gap-2">
-                            <VscAccount size={25}/>
+                        <a href="/account" className="p-2 flex gap-2 items-center">
+                            <VscAccount size={20}/>
                             <p>Profile</p>
                         </a>
 
-                        <a href={"/account/links"} className="p-2 flex gap-2">
-                            <BiLink size={25}/>
+                        <a href="/account/links" className="p-2 flex gap-2 items-center">
+                            <BiLink size={20}/>
                             <p>Your Links</p>
                         </a>
 
-                        <button type="button" onClick={handleLogout} className="p-2 flex gap-2">
-                            <BiLogOut size={25}/>
+                        <button type="button" onClick={handleLogout} className="p-2 flex gap-2 items-center">
+                            <BiLogOut size={20}/>
                             <p>Logout</p>
                         </button>
                     </div>
@@ -66,8 +67,8 @@ const AccountDropdown = () => {
             </div>
             :
             <div className="flex gap-4 items-center">
-                <a href="/account/login" className="rounded-full px-3 py-1.5 border-2 border-purple-800 hover:opacity-70 font-semibold">Sign In</a>
-                <a href="/account/login" className="rounded-full px-3 py-1.5 bg-purple-800 hover:opacity-70 font-semibold text-white">Sign Up</a>
+                <a href="/account/login" className="rounded-full px-3 py-1.5 border-2 border-pink-400 hover:opacity-70 font-semibold">Sign In</a>
+                <a href="/account/register" className="rounded-full px-3 py-1.5 bg-pink-400 hover:opacity-70 font-semibold text-white">Sign Up</a>
             </div>
     );
 };

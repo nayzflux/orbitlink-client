@@ -13,11 +13,11 @@ export const createLink = async (link) => {
     } catch (e) {
         console.log('Failed to create link!')
 
-        if (e?.response?.status) {
-            throw new Error(e.response.data?.message);
+        if (e?.response) {
+            throw e.response;
         }
 
-        throw new Error('Unknown error');
+        throw 'Unknown Error';
     }
 }
 
@@ -32,11 +32,11 @@ export const fetchLink = async (_id) => {
     } catch (e) {
         console.log('Failed to fetched link!')
 
-        if (e?.response?.status) {
-            throw new Error(e?.response?.status);
+        if (e?.response) {
+            throw e.response;
         }
 
-        throw new Error('Unknown error');
+        throw 'Unknown Error';
     }
 }
 
@@ -51,11 +51,11 @@ export const fetchAllLinks = async () => {
     } catch (e) {
         console.log('Failed to fetched all links!')
 
-        if (e?.response?.status) {
-            throw new Error(e?.response?.status);
+        if (e?.response) {
+            throw e.response;
         }
 
-        throw new Error('Unknown error');
+        throw 'Unknown Error';
     }
 }
 
@@ -70,11 +70,11 @@ export const updateLink = async (_id, link) => {
     } catch (e) {
         console.log('Failed to fetched link!')
 
-        if (e?.response?.status) {
-            throw new Error(e?.response?.status);
+        if (e?.response) {
+            throw e.response;
         }
 
-        throw new Error('Unknown error');
+        throw 'Unknown Error';
     }
 }
 
@@ -89,11 +89,11 @@ export const deleteLink = async (_id) => {
     } catch (e) {
         console.log('Failed to fetched link!')
 
-        if (e?.response?.status) {
-            throw new Error(e?.response?.status);
+        if (e?.response) {
+            throw e.response;
         }
 
-        throw new Error('Unknown error');
+        throw 'Unknown Error';
     }
 }
 
@@ -111,6 +111,8 @@ export const signIn = async (email, password) => {
         if (e?.response) {
             throw e.response;
         }
+
+        throw 'Unknown Error';
     }
 }
 
@@ -128,6 +130,8 @@ export const signUp = async (email, password, username) => {
         if (e?.response) {
             throw e.response;
         }
+
+        throw 'Unknown Error';
     }
 }
 
@@ -146,6 +150,24 @@ export const fetchUser = async (userId) => {
         if (e?.response) {
             throw e.response;
         }
+
+        throw 'Unknown Error';
+    }
+}
+
+export const updateUser = async (userId, data) => {
+    try {
+        const response = await axios.patch(`${API_URL}/users/${userId}`, data, {withCredentials: true});
+        console.log('Updated user!')
+        return response?.data;
+    } catch (e) {
+        console.log('Failed to update user!')
+
+        if (e?.response) {
+            throw e.response;
+        }
+
+        throw 'Unknown Error';
     }
 }
 
@@ -164,5 +186,34 @@ export const logout = async () => {
         if (e?.response) {
             throw e.response;
         }
+
+        throw 'Unknown Error';
+    }
+}
+
+
+export const fetchDestinationURL = async (shortURL, password) => {
+    try {
+        const response = await axios.get(`${API_URL}/${shortURL}`, {headers: {Authorization: password}});
+        return response?.data;
+    } catch (e) {
+        if (e?.response) {
+            throw e.response;
+        }
+
+        throw "Unknown error";
+    }
+}
+
+export const getStats = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/stats`);
+        return response?.data;
+    } catch (e) {
+        if (e?.response) {
+            throw e.response;
+        }
+
+        throw "Unknown error";
     }
 }

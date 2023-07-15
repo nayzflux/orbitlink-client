@@ -8,6 +8,7 @@ import ErrorMessage from "../forms/ErrorMessage.jsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {fetchLink, updateLink} from "../../utils/api.js";
 import {formatDate} from "../../utils/utils.js";
+import toast from "react-hot-toast";
 
 const EditLinkModal = () => {
     const params = useParams();
@@ -36,9 +37,8 @@ const EditLinkModal = () => {
     useEffect(() => {
         fetchLink(_id)
             .then(link => {
-                const {password, releaseDate, expirationDate, shortURL, destinationURL, expirationDateEnabled, passwordProtectionEnabled, releaseDateEnabled} = link;
+                const {releaseDate, expirationDate, shortURL, destinationURL, expirationDateEnabled, passwordProtectionEnabled, releaseDateEnabled} = link;
 
-                setPassword(password);
                 setExpirationDate(formatDate(new Date(expirationDate)));
                 setReleaseDate(formatDate(new Date(releaseDate)));
 
@@ -48,21 +48,24 @@ const EditLinkModal = () => {
 
                 setShortURL(shortURL);
                 setDestinationURL(destinationURL);
-            }).catch(code => {
-                if (code === 401) {
-                    return alert('Not logged!')
+            }).catch(res => {
+                if (res.status === 401) {
+                    toast.error("You need to be logged in")
+                    return navigate('/account/login')
                 }
 
-                if (code === 403) {
-                    return alert('Not allowed!')
+                if (res.status === 403) {
+                    toast.error("You're not allowed to view this link")
+                    return navigate('/account/links')
                 }
 
-                if (code === 404) {
-                    return alert('Not found!')
+                if (res.status === 404) {
+                    toast.error("This link doesn't exists");
+                    return navigate('/account/links')
                 }
 
-                return alert('Unknown error')
-            });
+                toast.error("Unable to view link")
+        });
     }, [_id]);
 
     const handleSubmit = (e) =>  {
@@ -72,11 +75,14 @@ const EditLinkModal = () => {
 
         updateLink(_id, {releaseDate, releaseDateEnabled, password, passwordProtectionEnabled, expirationDate, expirationDateEnabled, shortURL, destinationURL})
             .then(link => {
+                toast.success("Link updated");
                 setUpdating(false)
                 navigate('/account/links');
+
             }).catch(code => {
                 setUpdating(false)
                 setGlobalError('Unknow error')
+                toast.error("Unable to update link");
             });
     }
 
@@ -124,38 +130,40 @@ const EditLinkModal = () => {
     }
 
     return (
-        <div className="flex flex-col p-10 gap-5">
-            <div className="flex items-center">
-                <div className="flex flex-col">
-                    <h1 className="text-2xl font-semibold">
-                        Edit this link
-                    </h1>
+        <main className="flex items-center justify-center h-screen">
+            <div className="flex flex-col p-10 gap-5 bg-white shadow-lg rounded-lg">
+                <div className="flex items-center  gap-8">
+                    <div className="flex flex-col">
+                        <h1 className="text-2xl font-semibold">
+                            Edit this link
+                        </h1>
 
-                    <Description>Customize settings of your Short URL</Description>
+                        <Description>Customize settings of your Short URL</Description>
+                    </div>
+
+                    <button className="ml-auto" onClick={() => navigate('/account/links')}>
+                        <VscClose size={25}/>
+                    </button>
                 </div>
 
-                <button className="ml-auto" onClick={() => navigate('/account/links')}>
-                    <VscClose size={25}/>
-                </button>
+                <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                    <TextInput label="Destination URL" value={destinationURL} placeholder="https://example.com/mylink" onChange={handleDestinationURLChange}/>
+                    <TextInput label="Short URL" value={"orb.it/" + shortURL} onChange={handleShortURLChange}/>
+
+                    <hr className="rounded-full bg-neutral-200"/>
+
+                    <OptionalField label="Release Date" checked={releaseDateEnabled} value={releaseDate} type="datetime-local" onToggle={handleReleaseDateToggle} onValueChange={handleReleaseDateChange}/>
+                    <OptionalField label="Expiration Date" checked={expirationDateEnabled} value={expirationDate} type="datetime-local" onToggle={handleExpirationDateToggle} onValueChange={handleExpirationDateChange}/>
+                    <OptionalField placeholder="Enter password to allow user to acces the link" label="Password Restriction" checked={passwordProtectionEnabled} value={password} type="password" onToggle={handlePasswordRestrictionToggle} onValueChange={handlePasswordChange}/>
+
+                    <ErrorMessage>{globalError}</ErrorMessage>
+
+                    <PrimaryButton>
+                        Save
+                    </PrimaryButton>
+                </form>
             </div>
-
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-                <TextInput label="Destination URL" value={destinationURL} placeholder="https://example.com/mylink" onChange={handleDestinationURLChange}/>
-                <TextInput label="Short URL" value={"orb.it/" + shortURL} onChange={handleShortURLChange}/>
-
-                <hr className="rounded-full bg-neutral-200"/>
-
-                <OptionalField label="Release Date" checked={releaseDateEnabled} value={releaseDate} type="datetime-local" onToggle={handleReleaseDateToggle} onValueChange={handleReleaseDateChange}/>
-                <OptionalField label="Expiration Date" checked={expirationDateEnabled} value={expirationDate} type="datetime-local" onToggle={handleExpirationDateToggle} onValueChange={handleExpirationDateChange}/>
-                <OptionalField placeholder="Enter password to allow user to acces the link" label="Password Restriction" checked={passwordProtectionEnabled} value={password} type="password" onToggle={handlePasswordRestrictionToggle} onValueChange={handlePasswordChange}/>
-
-                <ErrorMessage>{globalError}</ErrorMessage>
-
-                <PrimaryButton>
-                    Save
-                </PrimaryButton>
-            </form>
-        </div>
+        </main>
     );
 };
 

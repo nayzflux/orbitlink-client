@@ -1,26 +1,31 @@
 import AccountDropdown from "./AccountDropdown.jsx";
+import {BiPlanet} from "react-icons/bi";
 
 const Header = () => {
     return (
-        <header className="flex items-center gap-8 p-6">
-            <h1 className="uppercase font-black">OrbitLink</h1>
+        <header className="flex items-center gap-8 p-6 shadow">
+            <div className="flex gap-1 items-center">
+                <BiPlanet size={36}/>
+
+                <h1 className="uppercase text-2xl font-bold">Orbit</h1>
+            </div>
 
             <nav>
                 <ul className="flex items-center gap-4">
                     <li>
-                        <a href="#">Home</a>
+                        <a href="/" className="hover:underline">Home</a>
                     </li>
 
                     <li>
-                        <a href="#">Features</a>
+                        <a href="/#features">Features</a>
                     </li>
 
                     <li>
-                        <a href="#">Statistics</a>
+                        <a href="/#statistics">Statistics</a>
                     </li>
 
                     <li>
-                        <a href="#">Github</a>
+                        <a href="/#github">Github</a>
                     </li>
                 </ul>
             </nav>

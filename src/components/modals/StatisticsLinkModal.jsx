@@ -15,6 +15,9 @@ import {
     YAxis
 } from "recharts";
 import SelectDataTypeButton from "../SelectDataTypeButton.jsx";
+import ErrorMessage from "../forms/ErrorMessage.jsx";
+import Loading from "../Loading.jsx";
+import toast from "react-hot-toast";
 
 const EditLinkModal = () => {
     const params = useParams();
@@ -62,6 +65,8 @@ const EditLinkModal = () => {
     const [deviceSelector, setDeviceSelector] = useState('BROWSER');
 
     const navigate = useNavigate();
+
+    const [loading, setLoading] = useState(true);
 
     /**
      * Fetch
@@ -134,7 +139,9 @@ const EditLinkModal = () => {
 
                 setClickNumber(link.statistics.clickNumber)
 
-                const cD = Object.keys(clickCountByDay).map(key => {
+                const cD = Object.keys(clickCountByDay).sort((a, b) => {
+                    return new Date(a).getTime() - new Date(b).getTime()
+                }).map(key => {
                     console.log(key)
                     return (
                         {name: new Date(key), click: clickCountByDay[key]}
@@ -184,22 +191,26 @@ const EditLinkModal = () => {
 
                 setCityData(cityD.sort((a, b) => a.click > b.click));
                 setCountryData(countryD.sort((a, b) => a.click > b.click));
+
+                setLoading(false)
             }).catch(code => {
-            console.log(code)
-                if (code === 401) {
-                    return navigate('/account/login')
-                }
+            if (code === 401) {
+                toast.error("You're not logged")
+                return navigate('/account/login')
+            }
 
-                if (code === 403) {
-                    return alert('Not allowed!')
-                }
+            if (code === 403) {
+                toast.error("You're not allowed to view this link")
+                return navigate('/account/links')
+            }
 
-                if (code === 404) {
-                    return alert('Not found!')
-                }
+            if (code === 404) {
+                toast.error("This link doesn't exists");
+                return navigate('/account/links')
+            }
 
-                return alert('Unknown error')
-            });
+            toast.error("Unable to fetch link");
+        });
     }, [_id]);
 
     const getLocationData = () => {
@@ -227,8 +238,9 @@ const EditLinkModal = () => {
     }
 
     return (
-        <div className="flex flex-col p-10 gap-5">
-            <div className="flex items-center">
+        <main className="flex items-center justify-center h-full">
+            <div className="flex flex-col p-10 gap-5 bg-white shadow-lg rounded-lg w-full">
+            <div className="flex items-center gap-8">
                 <div className="flex flex-col">
                     <h1 className="text-2xl font-semibold">
                         Statistics
@@ -255,15 +267,21 @@ const EditLinkModal = () => {
                     </div>
 
                     <div className="w-full h-80">
-                        <ResponsiveContainer>
-                            <LineChart data={clickData} margin={{ top: 5, right: 30, left: 20, bottom: 5}}>
-                                <Line overlineThickness={20} dataKey="click" />
-                                <CartesianGrid stroke="#ccc" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        {
+                            clickData.length > 0 ? <ResponsiveContainer>
+                                <LineChart data={clickData} margin={{ top: 5, right: 30, left: 20, bottom: 5}}>
+                                    <Line overlineThickness={20} dataKey="click" />
+                                    <CartesianGrid stroke="#ccc" />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip />
+                                </LineChart>
+                            </ResponsiveContainer> : <div className="flex items-center justify-center w-full h-full">
+                                {
+                                    loading ? <Loading/> : <ErrorMessage>There's no data to display</ErrorMessage>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
 
@@ -281,15 +299,17 @@ const EditLinkModal = () => {
                         </div>
 
                         <div className="w-full h-80">
-                            <ResponsiveContainer>
-                                <BarChart data={getLocationData()} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                                    <CartesianGrid stroke="#ccc"/>
-                                    <Bar label={{ position: 'top'}} fillOpacity={0.6} fill="blue" maxBarSize={20} dataKey="click" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip cursor={{ fillOpacity: 0.1 }}/>
-                                </BarChart>
-                            </ResponsiveContainer>
+                            {
+                                getLocationData().length > 0 ? <ResponsiveContainer>
+                                        <BarChart data={getLocationData()} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                                            <CartesianGrid stroke="#ccc"/>
+                                            <Bar label={{ position: 'top'}} fillOpacity={0.6} fill="blue" maxBarSize={20} dataKey="click" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip cursor={{ fillOpacity: 0.1 }}/>
+                                        </BarChart>
+                                    </ResponsiveContainer> : <div className="flex items-center justify-center w-full h-full"><ErrorMessage>There's no data to display</ErrorMessage></div>
+                            }
                         </div>
                     </div>
 
@@ -307,20 +327,23 @@ const EditLinkModal = () => {
                         </div>
 
                         <div className="w-full h-80">
-                            <ResponsiveContainer>
-                                <BarChart data={getDeviceData()} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                                    <CartesianGrid stroke="#ccc"/>
-                                    <Bar label={{ position: 'top'}} fillOpacity={0.6} fill="green" maxBarSize={20} dataKey="click" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip cursor={{ fillOpacity: 0.1 }}/>
-                                </BarChart>
-                            </ResponsiveContainer>
+                            {
+                                getDeviceData().length >= 1 ? <ResponsiveContainer>
+                                    <BarChart data={getDeviceData()} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                                        <CartesianGrid stroke="#ccc"/>
+                                        <Bar label={{ position: 'top'}} fillOpacity={0.6} fill="green" maxBarSize={20} dataKey="click" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis />
+                                        <Tooltip cursor={{ fillOpacity: 0.1 }}/>
+                                    </BarChart>
+                                </ResponsiveContainer> : <div className="flex items-center justify-center w-full h-full"><ErrorMessage>There's no data to display</ErrorMessage></div>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        </main>
     );
 };
 

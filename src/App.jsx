@@ -1,22 +1,27 @@
 import LinksPage from "./pages/LinksPage.jsx";
-import Header from "./components/headers/Header.jsx";
 import CreateLinkModal from "./components/modals/CreateLinkModal.jsx";
-import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import EditLinkModal from "./components/modals/EditLinkModal.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DeleteLinkModal from "./components/modals/DeleteLinkModal.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import StatisticsLinkModal from "./components/modals/StatisticsLinkModal.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import {Toaster} from "react-hot-toast";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import BasePage from "./pages/BasePage.jsx";
 
 function App() {
 
   return (
     <>
-        <Header/>
+        <Toaster position="bottom-center"/>
 
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<p>Root Page</p>}/>
+                <Route path="/:shortURL" element={<BasePage/>}/>
+
+                <Route path="/" element={<HomePage/>}/>
 
                 <Route path="/account/links" element={<LinksPage/>}/>
                 <Route path="/account/links/create" element={<CreateLinkModal/>} />
@@ -26,6 +31,8 @@ function App() {
 
                 <Route path="/account/login" element={<LoginPage/>}/>
                 <Route path="/account/register" element={<RegisterPage/>}/>
+
+                <Route path="/account" element={<ProfilePage/>}/>
             </Routes>
         </BrowserRouter>
     </>
